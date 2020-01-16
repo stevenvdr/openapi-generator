@@ -4,7 +4,14 @@ package {{packageName}}
 {{#-first}}import (
 {{/-first}}	"{{import}}"{{#-last}}
 )
-{{/-last}}{{/imports}}{{#model}}{{#isEnum}}{{#description}}// {{{classname}}} : {{{description}}}{{/description}}
+{{/-last}}{{/imports}}{{#model}}
+{{#oneOf}}
+{{#-first}}import (
+    "encoding/json"
+    "errors"
+)
+{{/-first}}
+{{/oneOf}}{{#isEnum}}{{#description}}// {{{classname}}} : {{{description}}}{{/description}}
 type {{{name}}} {{^format}}{{dataType}}{{/format}}{{#format}}{{{format}}}{{/format}}
 
 // List of {{{name}}}
@@ -14,11 +21,16 @@ const (
 	{{name}} {{{classname}}} = {{{value}}}
 	{{/enumVars}}
 	{{/allowableValues}}
-){{/isEnum}}{{^isEnum}}{{#description}}
+){{/isEnum}}{{^isEnum}}
+{{#oneOf}}
+{{#-first}}
+{{>modelOneOf}}
+{{/-first}}
+{{/oneOf}}{{^oneOf}}{{#description}}
 // {{classname}} - {{{description}}}{{/description}}
 type {{classname}} struct {
 {{#vars}}{{#description}}
 	// {{{description}}}{{/description}}
 	{{name}} {{#isNullable}}*{{/isNullable}}{{{dataType}}} `json:"{{baseName}}{{^required}},omitempty{{/required}}"{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
 {{/vars}}
-}{{/isEnum}}{{/model}}{{/models}}
+}{{/oneOf}}{{/isEnum}}{{/model}}{{/models}}

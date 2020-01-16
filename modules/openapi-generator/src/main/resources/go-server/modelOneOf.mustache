@@ -1,0 +1,34 @@
+{{#discriminator}}
+
+type OneOf{{classname}} interface {}
+
+{{#description}}
+// {{classname}} - {{{description}}}{{/description}}
+type {{classname}} struct {
+    {{discriminatorName}} string `json:"{{propertyBaseName}}"`
+    Field OneOf{{classname}}
+}
+
+func (l *{{classname}}) UnmarshalJSON(data []byte) (err error) {
+	partial := &struct {
+		{{discriminatorName}} string `json:"{{propertyBaseName}}"`
+	}{}
+	err = json.Unmarshal(data, partial)
+	if err != nil {
+		return
+	}
+	l.{{discriminatorName}} = partial.{{discriminatorName}}
+
+	switch partial.{{discriminatorName}} { {{#mappedModels}}
+        case "{{mappingName}}":
+            field := &{{modelName}}{}
+            err = json.Unmarshal(data, field)
+            l.Field = *field
+        {{/mappedModels}}
+        default:
+            return errors.New("unknown type")
+        }
+	return
+}
+
+{{/discriminator}}
